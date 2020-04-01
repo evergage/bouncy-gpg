@@ -25,6 +25,20 @@ plugins {
     id "com.github.ben-manes.versions" version "0.27.0"
 }
 
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier = "sources"
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            artifact sourceJar
+        }
+    }
+}
+
 javadoc {
     include 'name/neuhalfen/projects/crypto/bouncycastle/openpgp/**'
     options.addBooleanOption('html5', true)
@@ -87,7 +101,7 @@ sourceCompatibility = 8
 targetCompatibility = 8
 
 group = 'name.neuhalfen.projects.crypto.bouncycastle.openpgp'
-version = '2.2.0'
+version = '2.2.0-evg1'
 
 repositories {
     jcenter()
