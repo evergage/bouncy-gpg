@@ -124,7 +124,7 @@ public final class DecryptionStreamFactory {
 
     Object pgpObj;
 
-    //
+    PGPOnePassSignatureList onePassSignatures = new PGPOnePassSignatureList(new PGPOnePassSignature[0]);
     while ((pgpObj = factory.nextObject()) != null) { //NOPMD
 
       if (pgpObj instanceof PGPEncryptedDataList) {
@@ -167,13 +167,12 @@ public final class DecryptionStreamFactory {
         return nextDecryptedStream(nextFactory, state);   // NOPMD: OnlyOneReturn
       } else if (pgpObj instanceof PGPOnePassSignatureList) {
         LOGGER.trace("Found instance of PGPOnePassSignatureList");
+        onePassSignatures = (PGPOnePassSignatureList) pgpObj;
 
-        if (signatureValidationStrategy.isRequireSignatureCheck()) {
-
+        if (signatureValidationStrategy.isRequireSignatureCheck(onePassSignatures)) {
           state.setSignatureFactory(factory);
 
           // verify the signature
-          final PGPOnePassSignatureList onePassSignatures = (PGPOnePassSignatureList) pgpObj;
           for (final PGPOnePassSignature signature : onePassSignatures) {
             final PGPPublicKey pubKey = config.getPublicKeyRings()
                 .getPublicKey(signature.getKeyID());
@@ -206,7 +205,7 @@ public final class DecryptionStreamFactory {
 
         final InputStream literalDataInputStream = ((PGPLiteralData) pgpObj).getInputStream();
 
-        if (signatureValidationStrategy.isRequireSignatureCheck()) {
+        if (signatureValidationStrategy.isRequireSignatureCheck(onePassSignatures)) {
           if (!state.hasVerifiableSignatures()) {
             throw new PGPException("Signature checking is required but message was not signed!");
           }

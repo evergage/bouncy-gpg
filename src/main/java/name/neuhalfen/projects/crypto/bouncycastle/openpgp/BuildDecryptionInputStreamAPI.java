@@ -166,6 +166,14 @@ public final class BuildDecryptionInputStreamAPI {
      */
     @Nonnull
     Build andIgnoreSignatures();
+
+    /**
+     * Require no signatures.
+     *
+     * @return next build step
+     */
+    @Nonnull
+    Build andRequireNoSignatures();
   }
 
   /**
@@ -317,6 +325,14 @@ public final class BuildDecryptionInputStreamAPI {
     public Build andIgnoreSignatures() {
       BuildDecryptionInputStreamAPI.this.signatureCheckingMode = SignatureValidationStrategies
           .ignoreSignatures();
+      return new Builder();
+    }
+
+    @Override
+    @Nonnull
+    public Build andRequireNoSignatures() {
+      BuildDecryptionInputStreamAPI.this.signatureCheckingMode = SignatureValidationStrategies
+              .requireNoSignatures();
       return new Builder();
     }
 

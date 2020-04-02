@@ -14,6 +14,7 @@ import name.neuhalfen.projects.crypto.bouncycastle.openpgp.validation.Signatures
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPOnePassSignature;
+import org.bouncycastle.openpgp.PGPOnePassSignatureList;
 import org.bouncycastle.openpgp.PGPSignatureList;
 
 final class RequireSpecificSignatureValidationStrategy implements SignatureValidationStrategy {
@@ -88,7 +89,7 @@ final class RequireSpecificSignatureValidationStrategy implements SignatureValid
   }
 
   @Override
-  public boolean isRequireSignatureCheck() {
+  public boolean isRequireSignatureCheck(PGPOnePassSignatureList onePassSignatures) {
     return true;
   }
 }

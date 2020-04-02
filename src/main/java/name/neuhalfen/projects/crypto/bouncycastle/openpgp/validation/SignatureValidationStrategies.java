@@ -183,4 +183,14 @@ public final class SignatureValidationStrategies {
     return new RequireSpecificSignatureValidationStrategy(
         Collections.singletonList(signaturesRequiredForThisKey));
   }
+
+  /**
+   * Require no signatures.
+   *
+   * @return an instance of the requested strategy
+   **/
+  public static SignatureValidationStrategy requireNoSignatures() {
+    return new RequireNoSignaturesValidationStrategy();
+  }
+
 }

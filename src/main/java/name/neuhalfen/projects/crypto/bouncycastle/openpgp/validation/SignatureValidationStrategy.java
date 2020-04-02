@@ -7,6 +7,7 @@ import java.util.Map;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPOnePassSignature;
+import org.bouncycastle.openpgp.PGPOnePassSignatureList;
 
 public interface SignatureValidationStrategy {
 
@@ -29,6 +30,7 @@ public interface SignatureValidationStrategy {
   /**
    * @return Iff a signature is required for a document. false: All, even broken(!) signatures are
    *     ignored.
+   * @param onePassSignatures the one-pass signatures that were present in the message being decrypted
    */
-  boolean isRequireSignatureCheck();
+  boolean isRequireSignatureCheck(PGPOnePassSignatureList onePassSignatures);
 }

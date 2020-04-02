@@ -9,6 +9,7 @@ import java.util.Map;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPOnePassSignature;
+import org.bouncycastle.openpgp.PGPOnePassSignatureList;
 import org.bouncycastle.openpgp.PGPSignature;
 import org.bouncycastle.openpgp.PGPSignatureList;
 
@@ -69,7 +70,7 @@ final class RequireAnySignatureValidationStrategy implements SignatureValidation
   }
 
   @Override
-  public boolean isRequireSignatureCheck() {
+  public boolean isRequireSignatureCheck(PGPOnePassSignatureList onePassSignatures) {
     return true;
   }
 }
