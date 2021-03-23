@@ -1,0 +1,101 @@
+ext.stagingDirectory = file("${buildDir}/sfci-target/staging")
+ext.repositoryDirectory = file("${buildDir}/sfci-target/deploy")
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier = "sources"
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            artifact sourceJar
+        }
+    }
+    repositories {
+        maven {
+            name = 'nexus'
+            // passed in with -PnexusUrl=https://foo.com
+            url = nexusUrl
+            // set by gradleInit()
+            credentials {
+                username nexusUsername
+                password nexusPassword
+            }
+        }
+    }
+}
+
+configurations {
+    nexusStaging {
+        transitive = false
+    }
+}
+
+dependencies {
+    // the nexusStaging scope will not be included in the pom or output artifacts
+    nexusStaging group: 'org.sonatype.nexus.ant', name: 'nexus-staging-ant-tasks', version: '1.6.3', classifier: 'uber'
+}
+
+// https://github.com/sonatype/nexus-ant-tasks/tree/master/nexus-staging-ant-tasks
+task deploy(description: 'Build and deploy artifacts to staging and release staging repository',
+        dependsOn: ['stageRemotely'])
+
+task configure(description: "Configure staging deployment to $nexusUrl") {
+    doLast {
+        ant.taskdef(uri: 'staging', resource: 'org/sonatype/nexus/ant/staging/antlib.xml',
+                classpath: configurations.nexusStaging.asPath)
+        ant.'staging:nexusStagingInfo'(id: nexusStagingInfoId, stagingDirectory: stagingDirectory) {
+            'staging:projectInfo'(stagingProfileId: stagingProfileId)
+            'staging:connectionInfo'(baseUrl: nexusUrl) {
+                'staging:authentication'(username: nexusUsername, password: nexusPassword)
+            }
+        }
+    }
+}
+
+task createRepository(description: 'Create a local repository as build output') {
+    inputs.dir "${buildDir}/libs"
+    outputs.dir repositoryDirectory
+    doLast {
+        // create a local Maven repository in repositoryDirectory using the project coordinates
+        String groupIdPath = project.group.replace('.', '/')
+        String repositoryPath = "${repositoryDirectory}/${groupIdPath}/${project.name}/${project.version}"
+        File repositoryDirectory = new File(repositoryPath)
+        repositoryDirectory.mkdirs()
+        // adding a Maven pom file
+        String pomFileName = "${repositoryPath}/${project.name}-${project.version}.pom"
+        // pom will automatically have the dependencies and project coordinates included, you can add more here
+        pom {}.writeTo(pomFileName)
+        // adding the build output
+        copy {
+            from "${buildDir}/libs"
+            into repositoryDirectory
+        }
+        logger.lifecycle("    Build artifacts deployed in repository in ${repositoryDirectory}")
+    }
+}
+
+task stageLocally(description: 'Prepares a local staging folder',
+        dependsOn: ['configure', 'createRepository'] ) {
+    inputs.dir repositoryDirectory
+    outputs.dir stagingDirectory
+    doLast {
+        ant.'staging:stageLocally' {
+            'staging:nexusStagingInfo'(refid: nexusStagingInfoId)
+            fileset(dir: repositoryDirectory, includes: "**/*.*")
+        }
+        logger.lifecycle("    Staged build output into ${stagingDirectory}")
+    }
+}
+
+task stageRemotely(description: 'Upload the local staging folder',
+        dependsOn: ['stageLocally']) {
+    doLast {
+        ant.'staging:stageRemotely' {
+            'staging:nexusStagingInfo'(refid: nexusStagingInfoId)
+        }
+        logger.lifecycle("    Created the remote staging repository.")
+    }
+}
