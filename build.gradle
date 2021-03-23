@@ -23,8 +23,6 @@ plugins {
     id 'signing'
     id "com.jfrog.bintray" version "1.8.4"
     id "com.github.ben-manes.versions" version "0.27.0"
-    // required for SFCI Nexus Artifact Staging/Promotion
-    //id "io.codearte.nexus-staging" version "0.30.0"
 }
 
 javadoc {
