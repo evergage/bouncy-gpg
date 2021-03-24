@@ -171,9 +171,7 @@ apply plugin: 'biz.aQute.bnd.builder'
 // gradle -PSFCI
 if (hasProperty('SFCI')) {
     apply from: 'sfci.gradle'
-}
-
-// gradle -PEVG
-if (hasProperty('EVG')) {
+} else {
     apply from: 'evg.gradle'
 }
+
