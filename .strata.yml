@@ -1,0 +1,12 @@
+pipeline_template: jar/Jenkinsfile-1
+email_reply_to: mc-hypergage@salesforce.com
+time_out_mins: 180                                   # (Optional) default shown
+number_of_artifacts_to_keep: 3                       # (Optional) default shown
+compliance_required: false                           # (Optional) default shown
+docker_test_images:
+   - dva/sfdc_centos7_java8_build
+unit_tests_command: echo "no tests included"
+production_branch:                                   # (Optional) default shown
+     - strata                                        # if using regex, append "r:" in front of pattern
+email_only_last_committer_on_dev_branch: true        # (Optional) default shown
+publish_jar_image: dva/hypergage-jdk11-gradle:a33e355828718f0b17d7f46abaae3b5a864169b4
