@@ -5,4 +5,5 @@ signing.gnupg.useLegacyGpg=false
 bintray_dryRun=false
 bintray_publish=true
 bintray_Username=neuhalje
+// @@Credential-Scanning-Service-Annotation-Ignore@@
 bintray_Password=secret

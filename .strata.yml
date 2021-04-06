@@ -9,4 +9,4 @@ unit_tests_command: echo "no tests included"
 production_branch:                                   # (Optional) default shown
      - strata                                        # if using regex, append "r:" in front of pattern
 email_only_last_committer_on_dev_branch: true        # (Optional) default shown
-publish_jar_image: dva/hypergage-jdk11-gradle:a33e355828718f0b17d7f46abaae3b5a864169b4
+publish_jar_image: dva/hypergage-jdk11-gradle:3890ef4fa5825495d74e6c746762b72c327e6f40
