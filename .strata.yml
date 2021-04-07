@@ -7,6 +7,6 @@ docker_test_images:
    - dva/sfdc_centos7_java8_build
 unit_tests_command: echo "no tests included"
 production_branch:                                   # (Optional) default shown
-     - strata                                        # if using regex, append "r:" in front of pattern
+     - v2.2.0-evg                                    # if using regex, append "r:" in front of pattern
 email_only_last_committer_on_dev_branch: true        # (Optional) default shown
-publish_jar_image: dva/hypergage-jdk11-gradle:3890ef4fa5825495d74e6c746762b72c327e6f40
+publish_jar_image: dva/hypergage-jdk11-gradle:7b5e9d6d3b2d792981601501186872c806e1086e

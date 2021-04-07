@@ -15,14 +15,14 @@ plugins {
     id 'pmd'
 
     // required for: website.gradle
-    //id 'org.ajoberstar.git-publish' version '0.3.0'
+    id 'org.ajoberstar.git-publish' version '0.3.0'
 
     // deploy to maven central
     id 'maven'
     id 'maven-publish'
     id 'signing'
-    //id "com.jfrog.bintray" version "1.8.4"
-    //id "com.github.ben-manes.versions" version "0.27.0"
+    id "com.jfrog.bintray" version "1.8.4"
+    id "com.github.ben-manes.versions" version "0.27.0"
 }
 
 javadoc {
@@ -87,8 +87,7 @@ sourceCompatibility = 8
 targetCompatibility = 8
 
 group = 'com.evergage.thirdparty.crypto'
-version = '1.0.0'
-//version = '2.2.0-evg2'
+version = '2.2.0-evg2'
 
 repositories {
     jcenter()
@@ -160,7 +159,7 @@ if (hasProperty('bintray_Username')) {
     apply from: 'bintray.gradle'
 }
 
-//apply from: 'website.gradle'
+apply from: 'website.gradle'
 
 wrapper {
     gradleVersion = '6.1'
