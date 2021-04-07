@@ -1,0 +1,26 @@
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier = "sources"
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            artifact sourceJar
+        }
+    }
+    repositories {
+        maven {
+            name = 'nexus'
+            def releasesRepoUrl = "https://nexus.soma.salesforce.com/nexus/content/repositories/releases"
+            def snapshotsRepoUrl = "https://nexus.soma.salesforce.com/nexus/content/repositories/snapshots"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            // set by gradleInit()
+            credentials {
+                username nexusUsername
+                password nexusPassword
+            }
+        }
+    }
+}

@@ -315,6 +315,7 @@ cat user@example.com.pub.gpg
 gpg --export-secret-key -a user@example.com > user@example.com.secret.gpg
 cat user@example.com.secret.gpg
 
+// @@Credential-Scanning-Service-Annotation-Ignore@@
 -----BEGIN PGP PRIVATE KEY BLOCK-----
 ...
 -----END PGP PRIVATE KEY BLOCK-----
