@@ -57,6 +57,7 @@ public class App {
       "=WsAP\n" +
       "-----END PGP PUBLIC KEY BLOCK-----";
 
+  // @@Credential-Scanning-Service-Annotation-Ignore@@
   public final static String RECIPIENT_PRIVATE_KEY = "-----BEGIN PGP PRIVATE KEY BLOCK-----\n" +
       "Version: GnuPG v2\n" +
       "\n" +
