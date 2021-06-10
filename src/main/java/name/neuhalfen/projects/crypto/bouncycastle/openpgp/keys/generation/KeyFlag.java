@@ -17,9 +17,13 @@ package name.neuhalfen.projects.crypto.bouncycastle.openpgp.keys.generation;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
+
+import org.bouncycastle.bcpg.SignatureSubpacketTags;
 import org.bouncycastle.bcpg.sig.KeyFlags;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSignature;
@@ -72,7 +76,12 @@ public enum KeyFlag {
     this.flag = flag;
   }
 
+  @SuppressWarnings("PMD.OnlyOneReturn")
   public static Set<KeyFlag> fromInteger(int bitmask) {
+    if (bitmask == 0) {
+      return Collections.emptySet();
+    }
+
     final Set<KeyFlag> flags = EnumSet.noneOf(KeyFlag.class);
     int identifiedFlags = 0;
 
@@ -88,14 +97,22 @@ public enum KeyFlag {
       throw new IllegalArgumentException(
           "Could not identify the following KeyFlags: 0b" + Long.toBinaryString(unknownFlags));
     }
-    return flags;
+    return Collections.unmodifiableSet(flags);
   }
 
+  /**
+   * Returns the list of key flags (ie whether the key can be used to encrypt, sign, etc) based on the analysis of the
+   * KeyFlags subpacket. Returns an empty Optional object if the key does not contain a KeyFlags subpacket
+   * @param publicKey the key to analyse
+   * @return a list of key flags, or an empty Optional if the key doesn't contain a KeyFlags subpacket
+   */
   @SuppressWarnings({"PMD.LawOfDemeter"})
-  public static Set<KeyFlag> extractPublicKeyFlags(PGPPublicKey publicKey) {
+  public static Optional<Set<KeyFlag>> extractPublicKeyFlags(PGPPublicKey publicKey) {
     requireNonNull(publicKey, "publicKey must not be null");
 
     int aggregatedKeyFlags = 0;
+    boolean hasKeyFlags = false;
+    Optional<Set<KeyFlag>> publicKeyFlags;
 
     final Iterator<PGPSignature> directKeySignatures = publicKey.getSignatures();
 
@@ -103,10 +120,21 @@ public enum KeyFlag {
       final PGPSignature signature = directKeySignatures.next();
       final PGPSignatureSubpacketVector hashedSubPackets = signature.getHashedSubPackets();
 
-      final int keyFlags = hashedSubPackets.getKeyFlags();
-      aggregatedKeyFlags |= keyFlags;
+      if (hashedSubPackets != null && hashedSubPackets.hasSubpacket(SignatureSubpacketTags.KEY_FLAGS)) {
+        hasKeyFlags = true;
+        // hashedSubPackets is null for PGP v3 and earlier.
+        final int keyFlags = hashedSubPackets.getKeyFlags();
+        aggregatedKeyFlags |= keyFlags;
+      }
     }
-    return fromInteger(aggregatedKeyFlags);
+
+    if (hasKeyFlags) {
+      publicKeyFlags = Optional.of(fromInteger(aggregatedKeyFlags));
+    } else {
+      publicKeyFlags = Optional.empty();
+    }
+
+    return publicKeyFlags;
   }
 
   public int getFlag() {

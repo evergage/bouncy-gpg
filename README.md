@@ -202,8 +202,8 @@ repositories {
 
 //  ...
 dependencies {
-    compile 'org.bouncycastle:bcprov-jdk15on:1.64'
-    compile 'org.bouncycastle:bcpg-jdk15on:1.64'
+    compile 'org.bouncycastle:bcprov-jdk15on:1.67'
+    compile 'org.bouncycastle:bcpg-jdk15on:1.67'
     //  ...
     compile 'name.neuhalfen.projects.crypto.bouncycastle.openpgp:bouncy-gpg:2.+'
    // ...
@@ -215,10 +215,10 @@ dependencies {
     <dependency>
         <groupId>name.neuhalfen.projects.crypto.bouncycastle.openpgp</groupId>
         <artifactId>bouncy-gpg</artifactId>
-        <version>2.2.0</version>
-    </dependency>
+        <version>2.3.0</version>
+    </dependency>
 ```
-  
+ 
 ### Install Provider
 
 ```java

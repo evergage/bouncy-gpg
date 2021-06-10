@@ -40,6 +40,7 @@ public final class DecryptionStreamFactory {
   private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory
       .getLogger(DecryptionStreamFactory.class);
 
+  private PGPPublicKeyEncryptedData pbe;
 
   @Nonnull
   private final PGPContentVerifierBuilderProvider pgpContentVerifierBuilderProvider =
@@ -116,6 +117,7 @@ public final class DecryptionStreamFactory {
    * @throws PGPException the pGP exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
+
   @SuppressWarnings({"PMD.ExcessiveMethodLength", "PMD.OnlyOneReturn",
       "PMD.AvoidInstantiatingObjectsInLoops", "PMD.CyclomaticComplexity"})
   private InputStream nextDecryptedStream(PGPObjectFactory factory,
@@ -124,7 +126,6 @@ public final class DecryptionStreamFactory {
 
     Object pgpObj;
 
-    PGPOnePassSignatureList onePassSignatures = new PGPOnePassSignatureList(new PGPOnePassSignature[0]);
     while ((pgpObj = factory.nextObject()) != null) { //NOPMD
 
       if (pgpObj instanceof PGPEncryptedDataList) {
@@ -139,7 +140,7 @@ public final class DecryptionStreamFactory {
         // find the secret key
         //
         PGPPrivateKey privateKey = null;
-        PGPPublicKeyEncryptedData pbe = null; // NOPMD: must initialize pbe
+
         while (privateKey == null && encryptedDataObjects.hasNext()) {
           pbe = (PGPPublicKeyEncryptedData) encryptedDataObjects.next();
           privateKey = PGPUtilities.findSecretKey(config.getSecretKeyRings(), pbe.getKeyID(),
@@ -153,13 +154,14 @@ public final class DecryptionStreamFactory {
                   + " used to encrypt the file, aborting");
         }
 
+
+
         // decrypt the data
-        InputStream plainText = pbe
-            .getDataStream(new BcPublicKeyDataDecryptorFactory(
-                privateKey)); // NOPMD: AvoidInstantiatingObjectsInLoops        
+        final InputStream plainText = pbe // NOPMD: CloseResource
+            .getDataStream(new BcPublicKeyDataDecryptorFactory(privateKey)); // NOPMD: AvoidInstantiatingObjectsInLoops
         final PGPObjectFactory nextFactory = new PGPObjectFactory(plainText,
-                new BcKeyFingerprintCalculator());// NOPMD: AvoidInstantiatingObjectsInLoops
-        return nextDecryptedStream(nextFactory, state);  // NOPMD: OnlyOneReturn        
+            new BcKeyFingerprintCalculator());// NOPMD: AvoidInstantiatingObjectsInLoops
+        return nextDecryptedStream(nextFactory, state);  // NOPMD: OnlyOneReturn
       } else if (pgpObj instanceof PGPCompressedData) {
         LOGGER.trace("Found instance of PGPCompressedData");
         final PGPObjectFactory nextFactory = new PGPObjectFactory(
@@ -167,9 +169,10 @@ public final class DecryptionStreamFactory {
         return nextDecryptedStream(nextFactory, state);   // NOPMD: OnlyOneReturn
       } else if (pgpObj instanceof PGPOnePassSignatureList) {
         LOGGER.trace("Found instance of PGPOnePassSignatureList");
-        onePassSignatures = (PGPOnePassSignatureList) pgpObj;
 
+        final PGPOnePassSignatureList onePassSignatures = (PGPOnePassSignatureList) pgpObj;
         if (signatureValidationStrategy.isRequireSignatureCheck(onePassSignatures)) {
+
           state.setSignatureFactory(factory);
 
           // verify the signature
@@ -205,16 +208,16 @@ public final class DecryptionStreamFactory {
 
         final InputStream literalDataInputStream = ((PGPLiteralData) pgpObj).getInputStream();
 
-        if (signatureValidationStrategy.isRequireSignatureCheck(onePassSignatures)) {
+        if (signatureValidationStrategy.isRequireSignatureCheck(new PGPOnePassSignatureList(state.getOnePassSignatures().values().toArray(new PGPOnePassSignature[0])))) {
           if (!state.hasVerifiableSignatures()) {
             throw new PGPException("Signature checking is required but message was not signed!");
           }
-          return new SignatureValidatingInputStream(
+          return new MDCValidatingInputStream(new SignatureValidatingInputStream(
               literalDataInputStream,
-              state, signatureValidationStrategy);  // NOPMD: OnlyOneReturn
+              state, signatureValidationStrategy), pbe);  // NOPMD: OnlyOneReturn
 
         } else {
-          return literalDataInputStream; // NOPMD: OnlyOneReturn
+          return new MDCValidatingInputStream(literalDataInputStream, pbe); // NOPMD: OnlyOneReturn
         }
       } else { // keep on searching...
         if (LOGGER.isTraceEnabled()) {
